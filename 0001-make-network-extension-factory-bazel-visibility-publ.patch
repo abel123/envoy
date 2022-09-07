@@ -1,0 +1,49 @@
+From a671a431d021a150756a645dd23a46394c289f57 Mon Sep 17 00:00:00 2001
+From: zhengshuai <zhengshuai.fu@shopee.com>
+Date: Sun, 12 Jun 2022 01:36:16 +0800
+Subject: [PATCH] make network extension factory bazel visibility public
+
+---
+ source/extensions/common/wasm/BUILD            | 7 ++++---
+ source/extensions/filters/network/common/BUILD | 7 ++++---
+ 2 files changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/source/extensions/common/wasm/BUILD b/source/extensions/common/wasm/BUILD
+index ddda46e29e..74c22424fa 100644
+--- a/source/extensions/common/wasm/BUILD
++++ b/source/extensions/common/wasm/BUILD
+@@ -67,9 +67,10 @@ envoy_cc_library(
+         ],
+     }),
+     visibility = [
+-        "//source/extensions:__subpackages__",
+-        "//test/extensions:__subpackages__",
+-        "//test/test_common:__subpackages__",
++        #"//source/extensions:__subpackages__",
++        #"//test/extensions:__subpackages__",
++        #"//test/test_common:__subpackages__",
++        "//visibility:public",
+     ],
+     deps = [
+         ":wasm_hdr",
+diff --git a/source/extensions/filters/network/common/BUILD b/source/extensions/filters/network/common/BUILD
+index 2b89685600..b98914f86a 100644
+--- a/source/extensions/filters/network/common/BUILD
++++ b/source/extensions/filters/network/common/BUILD
+@@ -13,9 +13,10 @@ envoy_cc_library(
+     hdrs = ["factory_base.h"],
+     # This is useful code for classes implementing generic extensions.
+     visibility = [
+-        "//contrib:__subpackages__",
+-        "//source/extensions:__subpackages__",
+-        "//test:__subpackages__",
++        #"//contrib:__subpackages__",
++        #"//source/extensions:__subpackages__",
++        #"//test:__subpackages__",
++        "//visibility:public",
+     ],
+     deps = [
+         "//envoy/server:filter_config_interface",
+-- 
+2.36.1
+

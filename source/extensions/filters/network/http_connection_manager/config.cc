@@ -26,6 +26,7 @@
 #include "source/common/http/http1/codec_impl.h"
 #include "source/common/http/http1/settings.h"
 #include "source/common/http/http2/codec_impl.h"
+#include "source/common/http/custom/codec_impl.h"
 #include "source/common/http/request_id_extension_impl.h"
 #include "source/common/http/utility.h"
 #include "source/common/local_reply/local_reply.h"
@@ -574,6 +575,11 @@ HttpConnectionManagerConfig::HttpConnectionManagerConfig(
     throw EnvoyException("HTTP3 configured but not enabled in the build.");
 #endif
     break;
+  case envoy::extensions::filters::network::http_connection_manager::v3::HttpConnectionManager::CUSTOM:
+    {
+      codec_type_ = CodecType::CUSTOM;
+      break;
+    }
   }
   if (codec_type_ != CodecType::HTTP3 && context_.isQuicListener()) {
     throw EnvoyException("Non-HTTP/3 codec configured on QUIC listener.");
@@ -719,6 +725,9 @@ HttpConnectionManagerConfig::createCodec(Network::Connection& connection,
     // Should be blocked by configuration checking at an earlier point.
     PANIC("unexpected");
 #endif
+  case CodecType::CUSTOM:{
+    return std::make_unique<Http::Custom::ServerConnectionImpl>(connection, callbacks);
+  }
   case CodecType::AUTO:
     return Http::ConnectionManagerUtility::autoCreateCodec(
         connection, data, callbacks, context_.scope(), context_.api().randomGenerator(),

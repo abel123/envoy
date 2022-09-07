@@ -53,6 +53,8 @@ namespace Logger {
   FUNCTION(health_checker)                                                                         \
   FUNCTION(http)                                                                                   \
   FUNCTION(http2)                                                                                  \
+  FUNCTION(custom)                                                                                 \
+  FUNCTION(spex)                                                                                 \
   FUNCTION(hystrix)                                                                                \
   FUNCTION(init)                                                                                   \
   FUNCTION(io)                                                                                     \

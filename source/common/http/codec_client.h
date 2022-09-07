@@ -240,6 +240,7 @@ private:
 
   using ActiveRequestPtr = std::unique_ptr<ActiveRequest>;
 
+
   /**
    * Called when a response finishes decoding. This is called *before* forwarding on to the
    * wrapped decoder.

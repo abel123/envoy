@@ -217,6 +217,10 @@ NoConnectCodecClientProd::NoConnectCodecClientProd(
     PANIC("unexpected");
 #endif
   }
+  case CodecType::CUSTOM:{
+    
+    break;
+  }
   }
 }
 

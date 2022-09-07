@@ -222,6 +222,8 @@ Http::Protocol codecClientTypeToProtocol(Http::CodecType codec_client_type) {
     return Http::Protocol::Http2;
   case Http::CodecType::HTTP3:
     return Http::Protocol::Http3;
+  case Http::CodecType::CUSTOM:
+    PANIC_DUE_TO_CORRUPT_ENUM 
   }
   PANIC_DUE_TO_CORRUPT_ENUM
 }

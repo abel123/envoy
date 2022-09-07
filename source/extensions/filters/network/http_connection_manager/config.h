@@ -235,7 +235,7 @@ public:
   }
 
 private:
-  enum class CodecType { HTTP1, HTTP2, HTTP3, AUTO };
+  enum class CodecType { HTTP1, HTTP2, HTTP3, AUTO, CUSTOM };
   void
   processFilter(const envoy::extensions::filters::network::http_connection_manager::v3::HttpFilter&
                     proto_config,

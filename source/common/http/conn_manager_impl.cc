@@ -444,10 +444,14 @@ void ConnectionManagerImpl::resetAllStreams(absl::optional<StreamInfo::ResponseF
     // codec but there are no easy answers and this seems simpler.
     auto& stream = *streams_.front();
     stream.response_encoder_->getStream().removeCallbacks(stream);
+    ENVOY_LOG(error, "here xx");
+
     if (!stream.response_encoder_->getStream().responseDetails().empty()) {
+      ENVOY_LOG(error, "here xx");
       stream.filter_manager_.streamInfo().setResponseCodeDetails(
           stream.response_encoder_->getStream().responseDetails());
     } else if (!details.empty()) {
+      ENVOY_LOG(error, "here xx");
       stream.filter_manager_.streamInfo().setResponseCodeDetails(details);
     }
     if (response_flag.has_value()) {
@@ -519,10 +523,14 @@ void ConnectionManagerImpl::doConnectionClose(
     // Note that resetAllStreams() does not actually write anything to the wire. It just resets
     // all upstream streams and their filter stacks. Thus, there are no issues around recursive
     // entry.
+
+    ENVOY_LOG(error, "here   ");
     resetAllStreams(response_flag, details);
+    ENVOY_LOG(error, "here xx");
   }
 
   if (close_type.has_value()) {
+    ENVOY_LOG(error, "here");
     read_callbacks_->connection().close(close_type.value());
   }
 }

@@ -1,0 +1,160 @@
+syntax = "proto2";
+
+package sp.common;
+
+message SpexCodec {
+}
+
+message Constant {
+  enum ErrorCode {
+    SUCCESS = 0;
+
+    // Spex public error. 1 ~ 999
+    ERROR_SP_NOT_INIT = 100;
+    ERROR_SP_NEED_AUTH = 101; // service key or config key not match
+    ERROR_SP_SERVICE_UNAVAILABLE = 102;  // dest spex could not found specify service
+    ERROR_SP_SERVICE_BUSY = 103; // The service already has a lot of pending requests and can not accept new requests
+    ERROR_SP_SERVICE_NOT_FOUND = 104;  // found services for the command but all of them have been filtered
+    ERROR_SP_PARAMS = 105;  // param error, routing key is invalid
+    ERROR_SP_HEADER = 106; // header wrong
+    ERROR_SP_TIMEOUT = 107; // spex system timeout
+    ERROR_SP_INSTANCE_DUPLICATED = 108; //service instance register repeatedly
+    ERROR_SP_OVERLOAD = 109; // Spex or service is overload so it stop handling request
+    ERROR_SP_SERVE_PERMISSION = 110; // Serve white list not match
+    ERROR_SP_ACCESS_PERMISSION = 111; // Access white list not match
+    ERROR_SP_INTERNAL = 112; // Spex panic or internal error
+    ERROR_SP_SPEX_UNAVAILABLE = 113; // Could not connect to peer spex
+    ERROR_SP_BODY = 114; // proto unmarshal error
+    ERROR_SP_PFB_NOT_FOUND = 115; // could not find certain feature service instance
+    ERROR_SP_SUBSET_NOT_FOUND = 116; // could not find target subset definition
+    ERROR_SP_SPEX_NETWORK = 117; // spex network layer error
+    ERROR_SP_SPCON_SUBSCRIBE = 118; // spcon subscribe or unsubscribe error
+    ERROR_SP_SPROUT_AUTH = 119; // sprout authenticate error
+    ERROR_SP_SPROUT_REGISTER = 120; // sprout register or unregister error
+    ERROR_SP_SPROUT_NOTIFY = 121; // sprout notify error
+    ERROR_SP_SPROUT_KEEPALIVE = 122; // sprout keepalive error
+    ERROR_SP_SPROUT_LEASE = 123; // sprout lease error
+    ERROR_SP_EMPTY_ROUTING = 124; // not found any service for the command
+    ERROR_SP_RULE_NOT_FOUND = 125; // not found any matched rule
+
+    // Spex internal errors. 1000 ~ 9999
+    // 9000 ~ 9990: Business error from spex
+    ERROR_SP_SERIVCE_OFFLINE = 9000; // service already exit
+    ERROR_SP_SERIVCE_ERROR = 9001; // unified service error
+    // Common errors for services. 10000 ~ 19999
+    ERROR_UNKNOWN = 10000;  // The error is caused by a unknown problem, not recommended to use unless necessary.
+    ERROR_NOT_INIT = 10001;   // Service or module not init
+    ERROR_PARAMS = 10002; // Param error
+    ERROR_PERMISSION = 10003; // Error permission
+    ERROR_TIMEOUT = 10004; // Timeout
+    ERROR_SYSTEM = 10005; // Dependency error on service provider
+    ERROR_QUOTA_LIMIT = 10006; // Quota limit error
+    ERROR_NOT_IMPLEMENTED = 10007; // Method or command not implemented
+    ERROR_DEPRECATED = 10008; // Method or command is already deprecated
+    ERROR_SERVICE_UNAVAILABLE = 10009;  // Could not find specify service or no response,request could be retried
+    ERROR_SERVICE_BUSY = 10010; // Dest service busy, request can not be retried
+    ERROR_SERVICE_INTERNAL = 10011; // Service internal error or panic
+    ERROR_NEED_AUTH = 10012; // Request need auth
+    ERROR_NOT_FOUND = 10013; // Resource not found
+    ERROR_ENTITY_EXISTED = 10014; // Entity already existed
+    ERROR_EXCEED_LIMIT = 10015; // Request data exceed limit
+    ERROR_SERVICE_OVERLOAD = 10016; // Service is overloaded so it stops handling request
+    ERROR_EARLY_REJECTION = 10017; // Request is rejected due to deadline exceeded
+    ERROR_CIRCUIT_BREAKER_TRIPPED = 10018; // Circuit breaker is tripped, so it disallows sending the request
+
+    // Aegis errors. 10200 ~ 10299
+    ERROR_AEGIS_DROPPED = 10200;  // Service overloaded and request dropped by Aegis
+
+    ERROR_BIZ_ERROR = 10300; // Code to stand for error code by other framework during fully migrate to SPEX
+    // Service-specific errors. 100000 ~ 1000000000
+  }
+
+  enum SpexHeaderFlag {
+    RPC_REQUEST = 0;
+    RPC_REPLY = 1;
+  }
+
+  enum SpexHeaderFlagBitmask {
+    HEADER_BITMASK_RPC_REPLY = 1; // 1<<0, 0 means RPC_REQUEST, 1 means RPC_REPLY
+    HEADER_BITMASK_APPLICATION_HEADER = 2; // 1<<1
+  }
+
+  enum SpexHeaderContentType {
+    CONTENT_TYPE_PROTOBUF = 0; // default
+    CONTENT_TYPE_JSON = 1;  // json
+    CONTENT_TYPE_HTTP = 2;  // http
+
+    CONTENT_TYPE_CUSTOM_START = 65536; // custom content type start number
+  }
+}
+
+// InstanceStatus is the status for instance, can refer to https://confluence.shopee.io/x/vSGwE
+enum InstanceStatus {
+  UP = 0;
+  DOWN = 1;
+  FORCED_UP = 2;
+  FORCED_DOWN = 3;
+  STARTING = 4;
+}
+
+message SpexHeader {
+  optional bytes id = 1;  // max=100
+  optional uint32 flag = 2;
+  optional string key = 3;  // max=100
+  optional string command = 4;  // max=100
+  optional string source = 5;  // max=100
+  optional uint64 timestamp = 6; // Unix timestamp in microseconds
+  optional uint32 version = 7;
+  optional uint32 error = 8;  // Only used for Response
+  optional SpexHeaderQoS qos = 9;
+  optional string destination = 10;
+  optional uint32 content_type = 11; // enum SpexHeaderContentType
+  optional string span_context = 12; // span propagation
+  optional int64 session_id = 13;
+  optional Status status = 14;
+}
+
+message SpexHeaderQoS {
+  optional uint32 priority = 1;
+  optional uint32 timeout = 2;  //millisecond
+}
+
+message Any {
+  optional string type_url = 1;
+
+  // Must be a valid serialized protocol buffer of the above specified type.
+  optional bytes value = 2;
+}
+
+message Status {
+  optional uint32 code = 1;
+
+  // A developer-facing error message, which should be in English. Any
+  // user-facing error message should be localized and sent in the
+  // [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+  optional string message = 2;
+
+  // A list of messages that carry the error details.  There is a common set of
+  // message types for APIs to use.
+  repeated Any details = 3;
+}
+
+message KeepAliveRequest {
+  // Optional, can be ignored.
+  // Currently used as lease id for Sprout.
+  optional string opaque = 1;
+  optional uint32 health_status = 2;
+  optional bytes extra_data = 3;
+}
+
+message KeepAliveResponse {
+}
+
+message KV {
+  optional string key = 1;
+  optional string value = 2;
+}
+
+message Metadata {
+  repeated KV kvs = 1;
+}
