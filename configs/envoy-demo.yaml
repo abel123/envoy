@@ -85,4 +85,4 @@ static_resources:
               socket_address:
                 address: 10.129.99.71
                 port_value: 9990
-            hostname: entry_test.hello.global.test.master.default.f02a81f7321f48e199fdcb7577f03107
+            hostname: entry_test.hello.global.test.master.default.2735d822c77d4732bb278382aba35cc8

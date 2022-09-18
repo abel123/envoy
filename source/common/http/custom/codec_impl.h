@@ -205,15 +205,23 @@ protected:
   SpexCodec spex_codec_;
 };
 
-class ClientConnectionImpl : public ClientConnection, public ConnectionImpl {
+class ClientConnectionImpl : public ClientConnection,
+    public Network::ConnectionCallbacks,
+    public ConnectionImpl 
+{
 public:
   ClientConnectionImpl(Network::Connection& connection, ConnectionCallbacks& callbacks):
     ConnectionImpl(connection), request_encoder_(*this){
     (void)callbacks;
     connection.enableHalfClose(true);
+    connection.addConnectionCallbacks(*this);
   }
 
   Http::Status dispatch(Buffer::Instance& data) override;
+  
+  void onEvent(Network::ConnectionEvent event) override;
+  void onAboveWriteBufferHighWatermark() override {};
+  void onBelowWriteBufferLowWatermark() override {};
 
   void onAboveHighWatermark() override {};
   void onBelowLowWatermark() override {};

@@ -49,14 +49,13 @@ void StreamEncoderImpl::setAccount(Buffer::BufferMemoryAccountSharedPtr) {
 }
 
 const StreamInfo::BytesMeterSharedPtr& StreamEncoderImpl::bytesMeter() {
-    return this->bytes_meter_;
+  return this->bytes_meter_;
 }
 
 
 
 ConnectionImpl::ConnectionImpl(Network::Connection& connection):
     connection_(connection){
-
 }
 
 Http::Status ConnectionImpl::dispatch(Buffer::Instance& data){
@@ -238,6 +237,33 @@ Http::Status ServerConnectionImpl::dispatch(Buffer::Instance& data) {
   return Http::okStatus();
 }
 
+void ClientConnectionImpl::onEvent(Network::ConnectionEvent event) {
+  if (event == Network::ConnectionEvent::Connected) {
+    ENVOY_CONN_LOG(debug, "spex upstream connected", ConnectionImpl::connection());
+    ::sp::common::SpexHeader header;
+    header.set_id("connect-upstream");
+    header.set_command("sp.exchange.register_connection");
+    header.set_version(2);
+    header.mutable_qos()->set_timeout(5000);
+		
+    std::string header_content;
+    header.SerializeToString(&header_content);
+
+    auto output_buffer = std::make_unique<Buffer::OwnedImpl>();
+    int body_len = 0;
+    int total_len = header_content.size() + 2 + body_len;
+
+    output_buffer->writeLEInt<uint32_t>(total_len);
+    output_buffer->writeLEInt<uint16_t>(header_content.size());
+    output_buffer->addFragments({header_content});
+      
+    Buffer::InstancePtr buffer = std::move(output_buffer);
+
+    ConnectionImpl::connection().write(*buffer, false);
+    return;
+  }
+}
+
 Http::Status ClientConnectionImpl::dispatch(Buffer::Instance& data) {
   // TODO, change to callback instead
   this->spex_codec_.buffer_->move(data);
@@ -247,9 +273,12 @@ Http::Status ClientConnectionImpl::dispatch(Buffer::Instance& data) {
   while(status == CodecStatus::MESSAGE_COMPLETE){
     auto msg = this->spex_codec_.drainMessage();
     auto id = msg->header_.id();
-    ENVOY_CONN_LOG(trace, "got message: traceid-{}", this->connection_, 
+    ENVOY_CONN_LOG(trace, "got message: cmd {}, traceid-{}", this->connection_, msg->header_.command(), 
       Envoy::Hex::encode(reinterpret_cast<uint8_t *>(id.data()), id.length()));
-    
+    if(msg->header_.command() == "sp.exchange.register_connection"){
+      ENVOY_CONN_LOG(trace, "got message: traceid-{}", this->connection_, id);
+      break;
+    }
     ResponseHeaderMapPtr headers = ResponseHeaderMapImpl::create();
     Envoy::Http::LowerCaseString host_key("host");
     Envoy::Http::LowerCaseString cmd_key("sp-cmd");
