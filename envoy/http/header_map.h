@@ -7,6 +7,10 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <any>
+#include <typeinfo>
+#include <typeindex>
+#include <unordered_map>
 
 #include "envoy/common/optref.h"
 #include "envoy/common/pure.h"
@@ -682,6 +686,22 @@ public:
    */
   virtual StatefulHeaderKeyFormatterOptConstRef formatter() const PURE;
   virtual StatefulHeaderKeyFormatterOptRef formatter() PURE;
+
+  template<class Type>
+  void set_extension(Type val) {
+    extensions[std::type_index(typeid(Type))] = val;
+  }
+
+  template<class Type>
+  absl::optional<Type> get_extension() const{
+    auto key = std::type_index(typeid(Type));
+    if (extensions.find(key) != extensions.end()) {
+      return absl::optional<Type>(std::any_cast<Type>(extensions.find(key)->second));
+    }
+    return absl::nullopt;
+  }
+private:
+  std::unordered_map<std::type_index, std::any> extensions;
 };
 
 using HeaderMapPtr = std::unique_ptr<HeaderMap>;

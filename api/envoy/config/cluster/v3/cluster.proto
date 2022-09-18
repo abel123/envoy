@@ -1126,6 +1126,8 @@ message Cluster {
   // If ``connection_pool_per_downstream_connection`` is true, the cluster will use a separate
   // connection pool for every downstream connection
   bool connection_pool_per_downstream_connection = 51;
+
+  bool use_custom_protocol = 50000;
 }
 
 // Extensible load balancing policy configuration.

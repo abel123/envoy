@@ -831,6 +831,8 @@ const std::string& Utility::getProtocolString(const Protocol protocol) {
     return Headers::get().ProtocolStrings.Http2String;
   case Protocol::Http3:
     return Headers::get().ProtocolStrings.Http3String;
+  case Protocol::CUSTOM:
+    return Headers::get().ProtocolStrings.CustomString;
   }
 
   return EMPTY_STRING;

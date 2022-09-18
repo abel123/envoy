@@ -148,6 +148,7 @@ envoy_cc_library(
         ":http_server_properties_cache",
         "//source/common/http/http1:conn_pool_lib",
         "//source/common/http/http2:conn_pool_lib",
+        "//source/common/http/custom:conn_pool_lib",
         "//source/common/tcp:conn_pool_lib",
     ],
 )

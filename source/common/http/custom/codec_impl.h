@@ -149,6 +149,32 @@ public:
   Buffer::InstancePtr owned_output_buffer_;
 };
 
+class RequestEncoderImpl : public StreamEncoderImpl, public RequestEncoder {
+public:
+  RequestEncoderImpl(ConnectionImpl& connection): StreamEncoderImpl(connection),
+      owned_output_buffer_(std::make_unique<Buffer::OwnedImpl>()) {
+
+  }
+
+  ~RequestEncoderImpl() override{
+  }
+
+  void resetStream(StreamResetReason reason) override;
+
+  void encodeData(Buffer::Instance& data, bool end_stream) override;
+
+  Http::Status encodeHeaders(const RequestHeaderMap& headers, bool end_stream) override;
+
+  void encodeTrailers(const RequestTrailerMap& trailers) override;
+
+  void enableTcpTunneling() override {};
+
+//private:
+  SpexMessage pending_msg_;
+
+  Buffer::InstancePtr owned_output_buffer_;
+};
+
 class ServerConnectionImpl : public ServerConnection, public ConnectionImpl {
 public:
   Http::Status dispatch(Buffer::Instance& data) override;
@@ -176,6 +202,32 @@ protected:
   std::list<ActiveRequestPtr> active_requests_;
   Network::Connection& connection_;
   Http::ServerConnectionCallbacks& callbacks_;
+  SpexCodec spex_codec_;
+};
+
+class ClientConnectionImpl : public ClientConnection, public ConnectionImpl {
+public:
+  ClientConnectionImpl(Network::Connection& connection, ConnectionCallbacks& callbacks):
+    ConnectionImpl(connection), request_encoder_(*this){
+    (void)callbacks;
+    connection.enableHalfClose(true);
+  }
+
+  Http::Status dispatch(Buffer::Instance& data) override;
+
+  void onAboveHighWatermark() override {};
+  void onBelowLowWatermark() override {};
+
+  RequestEncoder& newStream(ResponseDecoder& response_decoder) override {
+    (void) response_decoder;
+    ENVOY_LOG(info, "new stream");
+
+    this->decoder_ = &response_decoder;
+    return request_encoder_;
+  }
+
+  RequestEncoderImpl request_encoder_;
+  ResponseDecoder* decoder_;
   SpexCodec spex_codec_;
 };
 

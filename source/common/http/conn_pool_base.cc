@@ -29,6 +29,8 @@ wrapTransportSocketOptions(Network::TransportSocketOptionsConstSharedPtr transpo
     case Http::Protocol::Http3:
       // HTTP3 ALPN is set in the QUIC stack based on supported versions.
       break;
+    case Http::Protocol::CUSTOM:
+      break;
     }
   }
 

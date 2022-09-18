@@ -30,13 +30,11 @@ envoy_cc_library(
     srcs = [
         "codec_impl.cc",
         "spex_codec.cc",
-        "conn_pool.cc"
         ],
 
     hdrs = [
         "codec_impl.h",
         "spex_codec.h",
-        "conn_pool.h"
         ],
 
     deps = [
@@ -72,26 +70,10 @@ envoy_cc_library(
     name = "conn_pool_lib",
     srcs = ["conn_pool.cc"],
     hdrs = ["conn_pool.h"],
-    external_deps = [
-        "nghttp2",
-        "quiche_http2_adapter",
-        "quiche_quic_platform",
-    ],
     deps = [
-        "//envoy/event:deferred_deletable",
-        "//envoy/event:dispatcher_interface",
-        "//envoy/event:timer_interface",
-        "//envoy/http:conn_pool_interface",
-        "//envoy/http:header_map_interface",
+         "//envoy/event:dispatcher_interface",
         "//envoy/upstream:upstream_interface",
         "//source/common/http:codec_client_lib",
-        "//source/common/http:http_server_properties_cache",
-        "//source/common/http:codec_wrappers_lib",
-        "//source/common/http:codes_lib",
         "//source/common/http:conn_pool_base_lib",
-        "//source/common/http:headers_lib",
-        "//source/common/runtime:runtime_features_lib",
-        "//source/common/upstream:upstream_lib",
-        "@com_github_google_quiche//:spdy_core_alt_svc_wire_format_lib",
     ],
 )

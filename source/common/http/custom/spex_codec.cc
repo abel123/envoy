@@ -12,8 +12,8 @@ CodecStatus SpexCodec::decode() {
     while(true){
         switch (this->state_) {
             case ParseState::HEADER_LENGTH:{
-                this->total_len_ = buffer_->drainLEInt<uint32_t>();
-                this->header_len_ = buffer_->drainLEInt<uint16_t>();
+                this->total_len_ = buffer_->peekLEInt<uint32_t>();
+                this->header_len_ = buffer_->peekLEInt<uint16_t>(sizeof(uint32_t));
 
                 this->state_ = ParseState::HEADER_BODY;
                 ENVOY_LOG(trace, "message length: {}, {}", this->total_len_, this->header_len_);
@@ -24,10 +24,13 @@ CodecStatus SpexCodec::decode() {
                     return CodecStatus::MORE_DATA;
                 }
 
-                void* start = this->buffer_->linearize(this->header_len_);
-                bool ok = this->pending_msg_->header_.ParseFromArray(static_cast<char*>(start), this->header_len_);
-                this->buffer_->drain(this->header_len_);
+                int offset = sizeof(uint32_t) + sizeof(uint16_t);
+                void* start = this->buffer_->linearize(this->header_len_ + offset);
+                bool ok = this->pending_msg_->header_.ParseFromArray(static_cast<char*>(start)+offset, this->header_len_);
+                //this->buffer_->drain(offset + this->header_len_);
+                
                 ENVOY_LOG(trace, "header {}, {}, buf len {}", this->pending_msg_->header_.DebugString(), ok, this->buffer_->length());
+                this->pending_msg_->raw_header_->move(*(this->buffer_.get()), offset + this->header_len_);
                 this->state_ = ParseState::BODY;
             }
             break;

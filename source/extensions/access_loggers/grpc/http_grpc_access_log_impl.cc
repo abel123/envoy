@@ -75,6 +75,9 @@ void HttpGrpcAccessLog::emitLog(const Http::RequestHeaderMap& request_headers,
     case Http::Protocol::Http3:
       log_entry.set_protocol_version(envoy::data::accesslog::v3::HTTPAccessLogEntry::HTTP3);
       break;
+    case Http::Protocol::CUSTOM:
+      log_entry.set_protocol_version(envoy::data::accesslog::v3::HTTPAccessLogEntry::HTTP2);
+      break;
     }
   }
 

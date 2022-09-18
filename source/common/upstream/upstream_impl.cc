@@ -1072,8 +1072,8 @@ ClusterInfoImpl::upstreamHttpProtocol(absl::optional<Http::Protocol> downstream_
     return {Http::Protocol::Http3, Http::Protocol::Http2, Http::Protocol::Http11};
   }
 
-  if (features_ & Upstream::ClusterInfo::Features::HTTP3) {
-    return {Http::Protocol::Http3};
+  if (features_ & Upstream::ClusterInfo::Features::CUSTOM) {
+    return {Http::Protocol::CUSTOM};
   }
 
   return {(features_ & Upstream::ClusterInfo::Features::HTTP2) ? Http::Protocol::Http2

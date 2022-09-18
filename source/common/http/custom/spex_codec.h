@@ -17,12 +17,14 @@ namespace Custom {
 struct SpexMessage : public Logger::Loggable<Logger::Id::spex> {
   SpexMessage() {
     this->body_ = std::make_unique<Buffer::OwnedImpl>();
+    this->raw_header_ = std::make_unique<Buffer::OwnedImpl>();
   }
 
   static const uint32_t HEADER_SIZE = 6;
   uint32_t total_len_;
   uint32_t header_len_;
   ::sp::common::SpexHeader header_;
+  std::unique_ptr<Buffer::OwnedImpl> raw_header_;
   std::unique_ptr<Buffer::OwnedImpl> body_;
 };
 

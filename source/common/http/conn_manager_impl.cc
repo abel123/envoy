@@ -361,6 +361,7 @@ void ConnectionManagerImpl::createCodec(Buffer::Instance& data) {
     stats_.named_.downstream_cx_http3_active_.inc();
     break;
   case Protocol::Http2:
+  case Protocol::CUSTOM:
     stats_.named_.downstream_cx_http2_total_.inc();
     stats_.named_.downstream_cx_http2_active_.inc();
     break;

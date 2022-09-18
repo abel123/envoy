@@ -60,18 +60,24 @@ uint64_t ProtocolOptionsConfigImpl::parseFeatures(const envoy::config::cluster::
                                                   const ProtocolOptionsConfigImpl& options) {
   uint64_t features = 0;
 
-  if (options.use_http2_) {
-    features |= Upstream::ClusterInfo::Features::HTTP2;
+  if(config.use_custom_protocol()){
+    features |= Upstream::ClusterInfo::Features::CUSTOM;
+  } else {
+    if (options.use_http2_) {
+      features |= Upstream::ClusterInfo::Features::HTTP2;
+    }
+    if (options.use_http3_) {
+      features |= Upstream::ClusterInfo::Features::HTTP3;
+    }
+
+    if (options.use_downstream_protocol_) {
+      features |= Upstream::ClusterInfo::Features::USE_DOWNSTREAM_PROTOCOL;
+    }
+    if (options.use_alpn_) {
+      features |= Upstream::ClusterInfo::Features::USE_ALPN;
+    }
   }
-  if (options.use_http3_) {
-    features |= Upstream::ClusterInfo::Features::HTTP3;
-  }
-  if (options.use_downstream_protocol_) {
-    features |= Upstream::ClusterInfo::Features::USE_DOWNSTREAM_PROTOCOL;
-  }
-  if (options.use_alpn_) {
-    features |= Upstream::ClusterInfo::Features::USE_ALPN;
-  }
+
   if (config.close_connections_on_host_health_failure()) {
     features |= Upstream::ClusterInfo::Features::CLOSE_CONNECTIONS_ON_HOST_HEALTH_FAILURE;
   }

@@ -31,9 +31,24 @@ static_resources:
               routes:
               - match:
                   prefix: "/"
+                  headers:
+                    - name: "Sp-Cmd"
+                      exact_match: "sp.exchange.register_routing"
+                route:
+                  cluster: service_envoyproxy_io
+              - match:
+                  prefix: "/"
+                  headers:
+                    - name: "Sp-Cmd"
+                      exact_match: "sp.common.keep_alive"
+                route:
+                  cluster: service_envoyproxy_io
+              - match:
+                  prefix: "/"
                 route:
                   #host_rewrite_literal: www.envoyproxy.io
-                  cluster: service_envoyproxy_io
+                  auto_host_rewrite: true
+                  cluster: spex_over_http
           http_filters:
           - name: envoy.filters.http.router
             typed_config:
@@ -53,3 +68,21 @@ static_resources:
               socket_address:
                 address: 127.0.0.1
                 port_value: 54321
+
+  - name: spex_over_http
+    #type: LOGICAL_DNS
+    # Comment out the following line to test on v6 networks
+    dns_lookup_family: V4_ONLY
+    lb_policy: ROUND_ROBIN
+    use_custom_protocol: true
+    connection_pool_per_downstream_connection: true
+    load_assignment:
+      cluster_name: service_envoyproxy_io
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: 10.129.99.71
+                port_value: 9990
+            hostname: entry_test.hello.global.test.master.default.f02a81f7321f48e199fdcb7577f03107

@@ -30,6 +30,7 @@
 #include "source/common/http/async_client_impl.h"
 #include "source/common/http/http1/conn_pool.h"
 #include "source/common/http/http2/conn_pool.h"
+#include "source/common/http/custom/conn_pool.h"
 #include "source/common/http/mixed_conn_pool.h"
 #include "source/common/network/resolver_impl.h"
 #include "source/common/network/utility.h"
@@ -1662,6 +1663,7 @@ ClusterManagerImpl::ThreadLocalClusterManagerImpl::ClusterEntry::httpConnPoolImp
   // we end up on a connection of the correct protocol, but for simplicity we're
   // starting with something simpler.
   auto upstream_protocols = host->cluster().upstreamHttpProtocol(downstream_protocol);
+  
   std::vector<uint8_t> hash_key;
   hash_key.reserve(upstream_protocols.size());
   for (auto protocol : upstream_protocols) {
@@ -1929,6 +1931,13 @@ Http::ConnectionPool::InstancePtr ProdClusterManagerFactory::allocateConnPool(
     PANIC("unexpected");
 #endif
   }
+
+  if (protocols.size() == 1 && protocols[0] == Http::Protocol::CUSTOM) {
+    return Http::Custom::allocateConnPool(dispatcher, context_.api().randomGenerator(), host,
+                                         priority, options, transport_socket_options, state, origin,
+                                         alternate_protocols_cache);
+  }
+
   ASSERT(protocols.size() == 1 && protocols[0] == Http::Protocol::Http11);
   return Http::Http1::allocateConnPool(dispatcher, context_.api().randomGenerator(), host, priority,
                                        options, transport_socket_options, state);

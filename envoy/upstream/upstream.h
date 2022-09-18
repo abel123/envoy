@@ -728,6 +728,8 @@ public:
     static constexpr uint64_t USE_ALPN = 0x8;
     // Whether the upstream supports HTTP3. This is used when creating connection pools.
     static constexpr uint64_t HTTP3 = 0x10;
+
+    static constexpr uint64_t CUSTOM = 0x100000;
   };
 
   virtual ~ClusterInfo() = default;

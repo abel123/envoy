@@ -10,6 +10,7 @@
 #include "source/common/http/exception.h"
 #include "source/common/http/http1/codec_impl.h"
 #include "source/common/http/http2/codec_impl.h"
+#include "source/common/http/custom/codec_impl.h"
 #include "source/common/http/status.h"
 #include "source/common/http/utility.h"
 
@@ -218,7 +219,7 @@ NoConnectCodecClientProd::NoConnectCodecClientProd(
 #endif
   }
   case CodecType::CUSTOM:{
-    
+    codec_ = std::make_unique<Custom::ClientConnectionImpl>(*connection_, *this);
     break;
   }
   }

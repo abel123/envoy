@@ -64,7 +64,7 @@ allocateConnPool(Event::Dispatcher& dispatcher, Random::RandomGenerator& random_
             pool->dispatcher(), pool->randomGenerator(), pool->transportSocketOptions())};
         return codec;
       },
-      std::vector<Protocol>{Protocol::Http2}, origin, cache);
+      std::vector<Protocol>{Protocol::CUSTOM}, origin, cache);
 }
 
 } // namespace Custom
